@@ -24,7 +24,7 @@ source venv/bin/activate
 
 # Install Python dependencies
 echo "Installing Python dependencies..."
-pip install flask flask-wtf gunicorn
+pip install flask flask-wtf flask-sqlalchemy gunicorn
 
 # Create necessary directories if they don't exist
 echo "Creating necessary directories..."
@@ -47,4 +47,4 @@ echo "Setting permissions..."
 chmod +x run.sh
 
 echo "Setup completed successfully!"
-echo "You can now run the application using: ./run.sh" 
+echo "You can now run the application using: ./run.sh"

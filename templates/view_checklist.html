@@ -17,19 +17,19 @@
                     <button onclick="toggleTheme()" class="p-2 rounded-lg opacity-60 hover:opacity-100 transition-all">
                         <i class="bi bi-moon-fill"></i>
                     </button>
-                    <a href="{{ url_for('download_pdf', checklist_id=checklist.id) }}" 
+                    <a href="{{ url_for('download_pdf', checklist_id=checklist.id) }}"
                        class="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors flex items-center space-x-2">
                         <i class="bi bi-file-pdf"></i>
                         <span class="hidden sm:inline">PDF</span>
                     </a>
-                    <button onclick="exportChecklist()" 
+                    <button onclick="exportChecklist()"
                             class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors flex items-center space-x-2">
                         <i class="bi bi-download"></i>
                         <span class="hidden sm:inline">Export</span>
                     </button>
                 </div>
             </div>
-            
+
             {% if checklist.subtitle %}
             <p class="text-gray-600 text-center mb-8">{{ checklist.subtitle }}</p>
             {% endif %}
@@ -55,10 +55,14 @@
                     <div class="text-sm text-gray-500">
                         Created {{ checklist.created_at.strftime('%Y-%m-%d %H:%M UTC') }}
                     </div>
-                    <a href="{{ url_for('index') }}" 
+                    <a href="{{ url_for('index') }}"
                        class="text-indigo-600 hover:text-indigo-800">
                         Create your own checklist →
                     </a>
+                </div>
+                <div class="text-center text-sm text-gray-400 mt-4">
+                    Made by <a href="https://skylens.ai" target="_blank" class="text-gray-500 hover:text-gray-700">skylens.ai</a>.
+                    Fork it on <a href="https://github.com/v-saba/checklist-editor" target="_blank" class="text-gray-500 hover:text-gray-700"><i class="bi bi-github"></i> GitHub</a>
                 </div>
             </div>
         </div>
@@ -109,10 +113,10 @@
         }
 
         // Check for saved theme preference or system preference
-        if (localStorage.getItem('theme') === 'dark' || 
+        if (localStorage.getItem('theme') === 'dark' ||
             (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         }
     </script>
 </body>
-</html> 
+</html>

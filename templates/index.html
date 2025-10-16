@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checklist Generator</title>
+    <title>Checklist Editor/Generator</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
@@ -17,11 +17,11 @@
                     <i class="bi bi-moon-fill"></i>
                 </button>
             </div>
-            
+
             <form method="POST" id="checklistForm" class="space-y-6">
                 {{ form.csrf_token }}
                 <input type="hidden" name="phases_data" id="phasesData">
-                
+
                 <div>
                     <label for="{{ form.title.id }}" class="block text-sm font-medium text-gray-700 mb-1">
                         Checklist Title
@@ -42,7 +42,7 @@
 
                 <div class="flex flex-col items-center space-y-4">
                     <div class="flex justify-left">
-                        <button type="button" onclick="addPhase()" 
+                        <button type="button" onclick="addPhase()"
                                 class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors flex items-center space-x-2">
                             <span>+ Add Phase</span>
                             <span class="hidden md:flex items-center text-white/70 text-sm ml-2 space-x-1">
@@ -53,7 +53,7 @@
                         </button>
                     </div>
                     <div class="flex justify-center space-x-4">
-                        
+
                         <button type="button" onclick="saveChecklist()"
                                 class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center space-x-2">
                             <i class="bi bi-share"></i>
@@ -85,8 +85,8 @@
                     </div>
                     <div id="shareUrlContainer" class="hidden">
                         <div class="flex items-center space-x-2">
-                            <input type="text" id="shareUrl" 
-                                   class="form-input w-96 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 font-mono text-sm" 
+                            <input type="text" id="shareUrl"
+                                   class="form-input w-96 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 font-mono text-sm"
                                    readonly>
                             <button type="button" onclick="copyShareUrl()"
                                     class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
@@ -96,6 +96,10 @@
                     </div>
                 </div>
             </form>
+            <div class="text-center text-sm text-gray-400 mt-6 pt-4 border-t">
+                Made by <a href="https://skylens.ai" target="_blank" class="text-gray-500 hover:text-gray-700">skylens.ai</a>.
+                Fork it on <a href="https://github.com/v-saba/checklist-editor" target="_blank" class="text-gray-500 hover:text-gray-700"><i class="bi bi-github"></i> GitHub</a>
+            </div>
         </div>
     </div>
 
@@ -193,11 +197,11 @@
         function handleItemKeyPress(event, phaseIndex, itemIndex, field) {
             if (event.key === 'Enter') {
                 event.preventDefault();
-                
+
                 if (event.shiftKey) {
                     // Shift+Enter: Create new phase
                     addPhase();
-                    
+
                     // Focus the phase name input
                     setTimeout(() => {
                         const newPhaseId = `phase-${phases.length - 1}`;
@@ -215,7 +219,7 @@
                     const currentPhaseId = `phase-${phaseIndex}`;
                     const oldItemCount = phases[phaseIndex].checklist_items.length;
                     addItem(phaseIndex);
-                    
+
                     // Focus the "read" field of the new item
                     setTimeout(() => {
                         const newItemId = `item-${phaseIndex}-${oldItemCount}`;
@@ -236,7 +240,7 @@
                 event.preventDefault();
                 const oldItemCount = phases[phaseIndex].checklist_items.length;
                 addItem(phaseIndex);
-                
+
                 // Focus the "read" field of the new item
                 setTimeout(() => {
                     const newItemId = `item-${phaseIndex}-${oldItemCount}`;
@@ -295,11 +299,11 @@
             const copyIcon = document.getElementById('copyIcon');
             shareUrl.select();
             document.execCommand('copy');
-            
+
             // Change to check icon temporarily
             copyIcon.classList.remove('bi-copy');
             copyIcon.classList.add('bi-check');
-            
+
             setTimeout(() => {
                 copyIcon.classList.remove('bi-check');
                 copyIcon.classList.add('bi-copy');
@@ -323,11 +327,11 @@
 
             if (event.key === 'Enter') {
                 event.preventDefault();
-                
+
                 if (event.shiftKey) {
                     // Shift+Enter: Create new phase
                     addPhase();
-                    
+
                     // Focus the phase name input
                     setTimeout(() => {
                         const newPhaseId = `phase-${phases.length - 1}`;
@@ -346,12 +350,12 @@
                     if (phases.length === 0) {
                         addPhase();
                     }
-                    
+
                     // Add item to the last phase
                     const lastPhaseIndex = phases.length - 1;
                     const oldItemCount = phases[lastPhaseIndex].checklist_items.length;
                     addItem(lastPhaseIndex);
-                    
+
                     // Focus the "read" field of the new item
                     setTimeout(() => {
                         const newItemId = `item-${lastPhaseIndex}-${oldItemCount}`;
@@ -371,7 +375,7 @@
         function exportChecklist() {
             const title = document.getElementById('{{ form.title.id }}').value;
             const subtitle = document.getElementById('{{ form.subtitle.id }}').value;
-            
+
             const checklistData = {
                 title: title,
                 subtitle: subtitle,
@@ -406,15 +410,15 @@
             reader.onload = function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
-                    
+
                     // Update title and subtitle
                     document.getElementById('{{ form.title.id }}').value = data.title || '';
                     document.getElementById('{{ form.subtitle.id }}').value = data.subtitle || '';
-                    
+
                     // Clear existing phases
                     phases = [];
                     document.getElementById('phasesContainer').innerHTML = '';
-                    
+
                     // Add imported phases
                     if (data.phases && Array.isArray(data.phases)) {
                         data.phases.forEach(phase => {
@@ -422,7 +426,7 @@
                                 name: phase.name,
                                 checklist_items: phase.checklist_items || []
                             });
-                            
+
                             const phaseId = `phase-${phases.length - 1}`;
                             const phaseHtml = `
                                 <div id="${phaseId}" class="border rounded-lg p-4 phase-container">
@@ -462,7 +466,7 @@
                             document.getElementById('phasesContainer').insertAdjacentHTML('beforeend', phaseHtml);
                         });
                     }
-                    
+
                     // Reset file input
                     event.target.value = '';
                 } catch (error) {
@@ -485,10 +489,10 @@
         }
 
         // Check for saved theme preference or system preference
-        if (localStorage.getItem('theme') === 'dark' || 
+        if (localStorage.getItem('theme') === 'dark' ||
             (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         }
     </script>
 </body>
-</html> 
+</html>
