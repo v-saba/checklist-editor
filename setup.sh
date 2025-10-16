@@ -15,7 +15,7 @@ sudo apt-get install -y python3 python3-pip python3-venv
 
 # Install XeLaTeX and required fonts
 echo "Installing XeLaTeX and fonts..."
-sudo apt-get install -y texlive-xetex texlive-fonts-recommended texlive-fonts-extra
+sudo apt-get install -y texlive-xetex texlive-fonts-recommended texlive-fonts-extra fonts-paratype
 
 # Create virtual environment
 echo "Creating Python virtual environment..."
