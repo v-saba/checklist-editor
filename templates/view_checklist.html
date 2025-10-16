@@ -19,10 +19,18 @@
         <div class="bg-white rounded-lg shadow-lg p-6">
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-3xl font-bold text-gray-900">{{ checklist.title }}</h1>
-                <a href="{{ url_for('download_pdf', checklist_id=checklist.id) }}" 
-                   class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors">
-                    Download PDF
-                </a>
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('download_pdf', checklist_id=checklist.id) }}" 
+                       class="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors flex items-center space-x-2">
+                        <i class="bi bi-file-pdf"></i>
+                        <span>Download PDF</span>
+                    </a>
+                    <button onclick="exportChecklist()" 
+                            class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors flex items-center space-x-2">
+                        <i class="bi bi-download"></i>
+                        <span>Export JSON</span>
+                    </button>
+                </div>
             </div>
             
             {% if checklist.subtitle %}
@@ -58,5 +66,39 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function exportChecklist() {
+            const checklist = {
+                title: "{{ checklist.title }}",
+                subtitle: "{{ checklist.subtitle }}",
+                phases: [
+                    {% for phase in checklist.phases %}
+                    {
+                        name: "{{ phase.name }}",
+                        checklist_items: [
+                            {% for item in phase.items %}
+                            {
+                                read: "{{ item.read }}",
+                                do: "{{ item.do }}"
+                            }{% if not loop.last %},{% endif %}
+                            {% endfor %}
+                        ]
+                    }{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                ]
+            };
+
+            const blob = new Blob([JSON.stringify(checklist, null, 2)], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "{{ checklist.title|lower|replace(' ', '_') }}.json";
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+    </script>
 </body>
 </html> 

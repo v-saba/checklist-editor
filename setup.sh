@@ -17,9 +17,8 @@ sudo apt-get install -y python3 python3-pip python3-venv
 echo "Installing XeLaTeX and fonts..."
 sudo apt-get install -y texlive-xetex texlive-fonts-recommended texlive-fonts-extra
 
-# Create virtual environment in parent directory
+# Create virtual environment
 echo "Creating Python virtual environment..."
-cd ..
 python3 -m venv venv
 source venv/bin/activate
 
@@ -29,19 +28,13 @@ pip install flask flask-wtf gunicorn
 
 # Create necessary directories if they don't exist
 echo "Creating necessary directories..."
-mkdir -p checklist_app/tmp
-mkdir -p checklist_app/logs
+mkdir -p tmp
+mkdir -p logs
 
 # Create WSGI entry point if it doesn't exist
-if [ ! -f checklist_app/wsgi.py ]; then
+if [ ! -f wsgi.py ]; then
     echo "Creating WSGI entry point..."
-    cat > checklist_app/wsgi.py << 'EOF'
-import os
-import sys
-
-# Add the app directory to the Python path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
+    cat > wsgi.py << 'EOF'
 from app import app
 
 if __name__ == "__main__":
@@ -51,7 +44,7 @@ fi
 
 # Set correct permissions
 echo "Setting permissions..."
-chmod +x checklist_app/run.sh
+chmod +x run.sh
 
 echo "Setup completed successfully!"
-echo "You can now run the application using: cd checklist_app && ./run.sh" 
+echo "You can now run the application using: ./run.sh" 

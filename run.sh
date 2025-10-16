@@ -3,8 +3,8 @@
 # Exit on error
 set -e
 
-# Activate virtual environment (from parent directory)
-source ../venv/bin/activate
+# Activate virtual environment
+source venv/bin/activate
 
 # Set Flask environment variables
 export FLASK_ENV=production
@@ -18,5 +18,4 @@ gunicorn --workers 3 \
          --error-logfile logs/error.log \
          --log-level info \
          --capture-output \
-         --chdir "$(dirname "$0")" \
          wsgi:app 
