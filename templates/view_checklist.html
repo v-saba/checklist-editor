@@ -1,34 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ checklist.title }} - Checklist</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <style>
-        .checklist-item {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            align-items: center;
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="min-h-screen">
     <div class="container mx-auto px-4 py-8 max-w-4xl">
         <div class="bg-white rounded-lg shadow-lg p-6">
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-3xl font-bold text-gray-900">{{ checklist.title }}</h1>
                 <div class="flex items-center space-x-4">
+                    <button onclick="toggleTheme()" class="p-2 rounded-lg opacity-60 hover:opacity-100 transition-all">
+                        <i class="bi bi-moon-fill"></i>
+                    </button>
                     <a href="{{ url_for('download_pdf', checklist_id=checklist.id) }}" 
                        class="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors flex items-center space-x-2">
                         <i class="bi bi-file-pdf"></i>
-                        <span>Download PDF</span>
+                        <span class="hidden sm:inline">PDF</span>
                     </a>
                     <button onclick="exportChecklist()" 
                             class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors flex items-center space-x-2">
                         <i class="bi bi-download"></i>
-                        <span>Export JSON</span>
+                        <span class="hidden sm:inline">Export</span>
                     </button>
                 </div>
             </div>
@@ -39,13 +36,13 @@
 
             <div class="space-y-8">
                 {% for phase in phases %}
-                <div class="border rounded-lg p-4 bg-gray-50">
+                <div class="border rounded-lg p-4 phase-container">
                     <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ phase.name }}</h2>
                     <div class="space-y-2">
                         {% for item in phase.checklist_items %}
-                        <div class="checklist-item bg-white p-3 rounded border">
-                            <div class="font-medium text-gray-900">{{ item.read }}</div>
-                            <div class="text-gray-600">{{ item.do }}</div>
+                        <div class="checklist-item bg-white dark:bg-gray-800 p-3 rounded border">
+                            <div class="font-medium text-gray-900 dark:text-gray-100">{{ item.read }}</div>
+                            <div class="text-gray-600 dark:text-gray-300">{{ item.do }}</div>
                         </div>
                         {% endfor %}
                     </div>
@@ -70,17 +67,17 @@
     <script>
         function exportChecklist() {
             const checklist = {
-                title: "{{ checklist.title }}",
-                subtitle: "{{ checklist.subtitle }}",
+                title: '{{ checklist.title|escapejs }}',
+                subtitle: '{{ checklist.subtitle|escapejs }}',
                 phases: [
                     {% for phase in checklist.phases %}
                     {
-                        name: "{{ phase.name }}",
+                        name: '{{ phase.name|escapejs }}',
                         checklist_items: [
                             {% for item in phase.items %}
                             {
-                                read: "{{ item.read }}",
-                                do: "{{ item.do }}"
+                                read: '{{ item.read|escapejs }}',
+                                do: '{{ item.do|escapejs }}'
                             }{% if not loop.last %},{% endif %}
                             {% endfor %}
                         ]
@@ -98,6 +95,23 @@
             a.click();
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Check for saved theme preference or system preference
+        if (localStorage.getItem('theme') === 'dark' || 
+            (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
         }
     </script>
 </body>

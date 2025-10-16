@@ -12,7 +12,7 @@ import re
 import sys
 import latex_generator
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static', static_folder='static')
 app.config['SECRET_KEY'] = 'your-secret-key'  # Change this in production
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///checklists.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
