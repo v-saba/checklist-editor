@@ -24,7 +24,7 @@ def generate_latex(title, subtitle, phases_data):
 \\usepackage{{fontspec}}
 
 % Set a simple sans-serif font
-\\setmainfont{{Arial}}
+\\setmainfont{{PT Sans}}
 
 % Configure section formatting
 \\titleformat{{\\section}}
