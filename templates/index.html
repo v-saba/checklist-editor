@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .form-input:focus {
+            outline: none;
+            border-color: #4F46E5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        .item-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 40px;
+            gap: 1rem;
+            align-items: center;
+        }
+        #shareModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            position: relative;
+            background: white;
+            margin: 15% auto;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h1 class="text-3xl font-bold text-gray-900 mb-6 text-center">Checklist Generator</h1>
+            
+            <form method="POST" id="checklistForm" class="space-y-6">
+                {{ form.csrf_token }}
+                <input type="hidden" name="phases_data" id="phasesData">
+                
+                <div>
+                    <label for="{{ form.title.id }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        Checklist Title
+                    </label>
+                    {{ form.title(class="form-input w-full px-3 py-2 border border-gray-300 rounded-md") }}
+                </div>
+
+                <div>
+                    <label for="{{ form.subtitle.id }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        Subtitle
+                    </label>
+                    {{ form.subtitle(class="form-input w-full px-3 py-2 border border-gray-300 rounded-md") }}
+                </div>
+
+                <div id="phasesContainer" class="space-y-6">
+                    <!-- Phases will be added here dynamically -->
+                </div>
+
+                <div class="flex flex-col items-center space-y-4">
+                    <div class="flex justify-left">
+                        <button type="button" onclick="addPhase()" 
+                                class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors flex items-center space-x-2">
+                            <span>+ Add Phase</span>
+                            <span class="hidden md:flex items-center text-white/70 text-sm ml-2 space-x-1">
+                                <i class="bi bi-shift"></i>
+                                <i class="bi bi-plus"></i>
+                                <i class="bi bi-arrow-return-left"></i>
+                            </span>
+                        </button>
+                    </div>
+                    <div class="flex justify-center space-x-4">
+                        
+                        <button type="button" onclick="saveChecklist()"
+                                class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center space-x-2">
+                            <i class="bi bi-share"></i>
+                            <span>Save & Share</span>
+                        </button>
+                        <button type="button" onclick="exportChecklist()"
+                                class="bg-purple-600 text-white px-6 py-2 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors flex items-center space-x-2">
+                            <i class="bi bi-download"></i>
+                            <span>Export JSON</span>
+                        </button>
+                        <button type="button" onclick="document.getElementById('importFile').click()"
+                                class="bg-purple-600 text-white px-6 py-2 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors flex items-center space-x-2">
+                            <i class="bi bi-upload"></i>
+                            <span>Import JSON</span>
+                        </button>
+                        <input type="file" id="importFile" accept=".json" style="display: none" onchange="importChecklist(event)">
+                        {{ form.submit(class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors flex items-center space-x-2") }}
+                        <script>
+                            // Add icon to the submit button after page load
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const submitButton = document.querySelector('input[type="submit"]');
+                                const buttonHtml = `<button type="submit" class="${submitButton.className}">
+                                    <i class="bi bi-file-pdf"></i>
+                                    <span>Generate PDF</span>
+                                </button>`;
+                                submitButton.outerHTML = buttonHtml;
+                            });
+                        </script>
+                    </div>
+                    <div id="shareUrlContainer" class="hidden">
+                        <div class="flex items-center space-x-2">
+                            <input type="text" id="shareUrl" 
+                                   class="form-input w-96 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 font-mono text-sm" 
+                                   readonly>
+                            <button type="button" onclick="copyShareUrl()"
+                                    class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
+                                <i class="bi bi-copy" id="copyIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let phases = [];
+
+        function addPhase() {
+            const phaseId = `phase-${phases.length}`;
+            phases.push({
+                name: `PHASE ${phases.length + 1}`,
+                checklist_items: []
+            });
+
+            const phaseHtml = `
+                <div id="${phaseId}" class="border rounded-lg p-4 bg-gray-50">
+                    <div class="flex justify-between items-center mb-4">
+                        <input type="text" class="form-input w-full px-3 py-2 border border-gray-300 rounded-md mr-4"
+                               value="PHASE ${phases.length + 1}"
+                               onchange="updatePhaseName(${phases.length - 1}, this.value)"
+                               onkeydown="handlePhaseNameKeyPress(event, ${phases.length - 1})">
+                        <button type="button" onclick="removePhase(${phases.length - 1})"
+                                class="text-red-600 hover:text-red-800">
+                            Remove Phase
+                        </button>
+                    </div>
+                    <div class="space-y-2" id="items-${phaseId}">
+                        <!-- Items will be added here -->
+                    </div>
+                    <button type="button" onclick="addItem(${phases.length - 1})"
+                            class="mt-2 text-indigo-600 hover:text-indigo-800">
+                        + Add Item
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('phasesContainer').insertAdjacentHTML('beforeend', phaseHtml);
+        }
+
+        function addItem(phaseIndex) {
+            const phaseId = `phase-${phaseIndex}`;
+            const itemId = `item-${phaseIndex}-${phases[phaseIndex].checklist_items.length}`;
+            phases[phaseIndex].checklist_items.push({
+                read: '',
+                do: ''
+            });
+
+            const itemHtml = `
+                <div id="${itemId}" class="item-row bg-white p-2 rounded border">
+                    <input type="text" class="form-input px-3 py-2 border border-gray-300 rounded-md"
+                           placeholder="Read part (e.g., Water pressure)"
+                           onchange="updateItem(${phaseIndex}, ${phases[phaseIndex].checklist_items.length - 1}, 'read', this.value)"
+                           onkeydown="handleItemKeyPress(event, ${phaseIndex}, ${phases[phaseIndex].checklist_items.length - 1}, 'read')">
+                    <input type="text" class="form-input px-3 py-2 border border-gray-300 rounded-md"
+                           placeholder="Do part (e.g., CHECK)"
+                           onchange="updateItem(${phaseIndex}, ${phases[phaseIndex].checklist_items.length - 1}, 'do', this.value)"
+                           onkeydown="handleItemKeyPress(event, ${phaseIndex}, ${phases[phaseIndex].checklist_items.length - 1}, 'do')">
+                    <button type="button" onclick="removeItem(${phaseIndex}, ${phases[phaseIndex].checklist_items.length - 1})"
+                            class="text-red-600 hover:text-red-800">
+                        ×
+                    </button>
+                </div>
+            `;
+
+            document.getElementById(`items-${phaseId}`).insertAdjacentHTML('beforeend', itemHtml);
+        }
+
+        function removePhase(phaseIndex) {
+            phases.splice(phaseIndex, 1);
+            document.getElementById(`phase-${phaseIndex}`).remove();
+            // Renumber remaining phases
+            phases.forEach((phase, index) => {
+                const phaseElement = document.getElementById(`phase-${index}`);
+                if (phaseElement) {
+                    const nameInput = phaseElement.querySelector('input[type="text"]');
+                    if (nameInput.value.startsWith('PHASE')) {
+                        nameInput.value = `PHASE ${index + 1}`;
+                    }
+                }
+            });
+        }
+
+        function removeItem(phaseIndex, itemIndex) {
+            phases[phaseIndex].checklist_items.splice(itemIndex, 1);
+            document.getElementById(`item-${phaseIndex}-${itemIndex}`).remove();
+        }
+
+        function updatePhaseName(phaseIndex, name) {
+            phases[phaseIndex].name = name;
+        }
+
+        function updateItem(phaseIndex, itemIndex, field, value) {
+            phases[phaseIndex].checklist_items[itemIndex][field] = value;
+        }
+
+        function handleItemKeyPress(event, phaseIndex, itemIndex, field) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                
+                if (event.shiftKey) {
+                    // Shift+Enter: Create new phase
+                    addPhase();
+                    
+                    // Focus the phase name input
+                    setTimeout(() => {
+                        const newPhaseId = `phase-${phases.length - 1}`;
+                        const newPhase = document.getElementById(newPhaseId);
+                        if (newPhase) {
+                            const nameInput = newPhase.querySelector('input[type="text"]');
+                            if (nameInput) {
+                                nameInput.focus();
+                                nameInput.select();
+                            }
+                        }
+                    }, 0);
+                } else {
+                    // Regular Enter: Add new item
+                    const currentPhaseId = `phase-${phaseIndex}`;
+                    const oldItemCount = phases[phaseIndex].checklist_items.length;
+                    addItem(phaseIndex);
+                    
+                    // Focus the "read" field of the new item
+                    setTimeout(() => {
+                        const newItemId = `item-${phaseIndex}-${oldItemCount}`;
+                        const newItem = document.getElementById(newItemId);
+                        if (newItem) {
+                            const readInput = newItem.querySelector('input:first-child');
+                            if (readInput) {
+                                readInput.focus();
+                            }
+                        }
+                    }, 0);
+                }
+            }
+        }
+
+        function handlePhaseNameKeyPress(event, phaseIndex) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                const oldItemCount = phases[phaseIndex].checklist_items.length;
+                addItem(phaseIndex);
+                
+                // Focus the "read" field of the new item
+                setTimeout(() => {
+                    const newItemId = `item-${phaseIndex}-${oldItemCount}`;
+                    const newItem = document.getElementById(newItemId);
+                    if (newItem) {
+                        const readInput = newItem.querySelector('input:first-child');
+                        if (readInput) {
+                            readInput.focus();
+                        }
+                    }
+                }, 0);
+            }
+        }
+
+        // Save and share functionality
+        async function saveChecklist() {
+            const title = document.getElementById('{{ form.title.id }}').value;
+            const subtitle = document.getElementById('{{ form.subtitle.id }}').value;
+
+            try {
+                const response = await fetch('/save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ form.csrf_token.current_token }}'
+                    },
+                    body: JSON.stringify({
+                        title,
+                        subtitle,
+                        phases
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to save checklist');
+                }
+
+                const data = await response.json();
+                if (data.success) {
+                    const shareUrl = document.getElementById('shareUrl');
+                    const shareUrlContainer = document.getElementById('shareUrlContainer');
+                    shareUrl.value = data.share_url;
+                    shareUrlContainer.classList.remove('hidden');
+                    shareUrl.select(); // Select the URL for easy copying
+                } else {
+                    throw new Error('Failed to save checklist');
+                }
+            } catch (error) {
+                console.error('Error saving checklist:', error);
+                alert('Failed to save checklist. Please try again.');
+            }
+        }
+
+        function copyShareUrl() {
+            const shareUrl = document.getElementById('shareUrl');
+            const copyIcon = document.getElementById('copyIcon');
+            shareUrl.select();
+            document.execCommand('copy');
+            
+            // Change to check icon temporarily
+            copyIcon.classList.remove('bi-copy');
+            copyIcon.classList.add('bi-check');
+            
+            setTimeout(() => {
+                copyIcon.classList.remove('bi-check');
+                copyIcon.classList.add('bi-copy');
+            }, 2000);
+        }
+
+        // Update hidden input before form submission
+        document.getElementById('checklistForm').addEventListener('submit', function(e) {
+            document.getElementById('phasesData').value = JSON.stringify(phases);
+        });
+
+        // Add initial phase
+        addPhase();
+
+        // Global keyboard shortcut for adding items
+        document.addEventListener('keydown', function(event) {
+            // Don't trigger if user is typing in an input field
+            if (document.activeElement.tagName === 'INPUT') {
+                return;
+            }
+
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                
+                if (event.shiftKey) {
+                    // Shift+Enter: Create new phase
+                    addPhase();
+                    
+                    // Focus the phase name input
+                    setTimeout(() => {
+                        const newPhaseId = `phase-${phases.length - 1}`;
+                        const newPhase = document.getElementById(newPhaseId);
+                        if (newPhase) {
+                            const nameInput = newPhase.querySelector('input[type="text"]');
+                            if (nameInput) {
+                                nameInput.focus();
+                                nameInput.select();
+                            }
+                        }
+                    }, 0);
+                } else {
+                    // Regular Enter: Add item to last phase
+                    // If no phases exist, create one
+                    if (phases.length === 0) {
+                        addPhase();
+                    }
+                    
+                    // Add item to the last phase
+                    const lastPhaseIndex = phases.length - 1;
+                    const oldItemCount = phases[lastPhaseIndex].checklist_items.length;
+                    addItem(lastPhaseIndex);
+                    
+                    // Focus the "read" field of the new item
+                    setTimeout(() => {
+                        const newItemId = `item-${lastPhaseIndex}-${oldItemCount}`;
+                        const newItem = document.getElementById(newItemId);
+                        if (newItem) {
+                            const readInput = newItem.querySelector('input:first-child');
+                            if (readInput) {
+                                readInput.focus();
+                            }
+                        }
+                    }, 0);
+                }
+            }
+        });
+
+        // Add import/export functionality
+        function exportChecklist() {
+            const title = document.getElementById('{{ form.title.id }}').value;
+            const subtitle = document.getElementById('{{ form.subtitle.id }}').value;
+            
+            const checklistData = {
+                title: title,
+                subtitle: subtitle,
+                phases: phases
+            };
+
+            // Format filename: replace spaces and special characters with underscores
+            let filename = title.trim() || 'checklist';
+            filename = filename.toLowerCase()
+                             .replace(/[^a-z0-9]+/g, '_')  // Replace special chars with underscore
+                             .replace(/^_+|_+$/g, '')      // Remove leading/trailing underscores
+                             .substring(0, 50);            // Limit length
+            if (!filename) filename = 'checklist';         // Fallback if empty
+            filename += '.json';
+
+            const blob = new Blob([JSON.stringify(checklistData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function importChecklist(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    // Update title and subtitle
+                    document.getElementById('{{ form.title.id }}').value = data.title || '';
+                    document.getElementById('{{ form.subtitle.id }}').value = data.subtitle || '';
+                    
+                    // Clear existing phases
+                    phases = [];
+                    document.getElementById('phasesContainer').innerHTML = '';
+                    
+                    // Add imported phases
+                    if (data.phases && Array.isArray(data.phases)) {
+                        data.phases.forEach(phase => {
+                            phases.push({
+                                name: phase.name,
+                                checklist_items: phase.checklist_items || []
+                            });
+                            
+                            const phaseId = `phase-${phases.length - 1}`;
+                            const phaseHtml = `
+                                <div id="${phaseId}" class="border rounded-lg p-4 bg-gray-50">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <input type="text" class="form-input w-full px-3 py-2 border border-gray-300 rounded-md mr-4"
+                                               value="${phase.name}"
+                                               onchange="updatePhaseName(${phases.length - 1}, this.value)">
+                                        <button type="button" onclick="removePhase(${phases.length - 1})"
+                                                class="text-red-600 hover:text-red-800">
+                                            Remove Phase
+                                        </button>
+                                    </div>
+                                    <div class="space-y-2" id="items-${phaseId}">
+                                        ${(phase.checklist_items || []).map((item, itemIndex) => `
+                                            <div id="item-${phases.length - 1}-${itemIndex}" class="item-row bg-white p-2 rounded border">
+                                                <input type="text" class="form-input px-3 py-2 border border-gray-300 rounded-md"
+                                                       value="${item.read || ''}"
+                                                       placeholder="Read part (e.g., Water pressure)"
+                                                       onchange="updateItem(${phases.length - 1}, ${itemIndex}, 'read', this.value)">
+                                                <input type="text" class="form-input px-3 py-2 border border-gray-300 rounded-md"
+                                                       value="${item.do || ''}"
+                                                       placeholder="Do part (e.g., CHECK)"
+                                                       onchange="updateItem(${phases.length - 1}, ${itemIndex}, 'do', this.value)">
+                                                <button type="button" onclick="removeItem(${phases.length - 1}, ${itemIndex})"
+                                                        class="text-red-600 hover:text-red-800">
+                                                    ×
+                                                </button>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                    <button type="button" onclick="addItem(${phases.length - 1})"
+                                            class="mt-2 text-indigo-600 hover:text-indigo-800">
+                                        + Add Item
+                                    </button>
+                                </div>
+                            `;
+                            document.getElementById('phasesContainer').insertAdjacentHTML('beforeend', phaseHtml);
+                        });
+                    }
+                    
+                    // Reset file input
+                    event.target.value = '';
+                } catch (error) {
+                    console.error('Error importing checklist:', error);
+                    alert('Failed to import checklist. Please make sure the file is a valid JSON checklist.');
+                }
+            };
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ checklist.title }} - Checklist</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .checklist-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            align-items: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold text-gray-900">{{ checklist.title }}</h1>
+                <a href="{{ url_for('download_pdf', checklist_id=checklist.id) }}" 
+                   class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors">
+                    Download PDF
+                </a>
+            </div>
+            
+            {% if checklist.subtitle %}
+            <p class="text-gray-600 text-center mb-8">{{ checklist.subtitle }}</p>
+            {% endif %}
+
+            <div class="space-y-8">
+                {% for phase in phases %}
+                <div class="border rounded-lg p-4 bg-gray-50">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ phase.name }}</h2>
+                    <div class="space-y-2">
+                        {% for item in phase.checklist_items %}
+                        <div class="checklist-item bg-white p-3 rounded border">
+                            <div class="font-medium text-gray-900">{{ item.read }}</div>
+                            <div class="text-gray-600">{{ item.do }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="mt-8 pt-4 border-t">
+                <div class="flex items-center justify-between">
+                    <div class="text-sm text-gray-500">
+                        Created {{ checklist.created_at.strftime('%Y-%m-%d %H:%M UTC') }}
+                    </div>
+                    <a href="{{ url_for('index') }}" 
+                       class="text-indigo-600 hover:text-indigo-800">
+                        Create your own checklist →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
