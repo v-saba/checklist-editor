@@ -1,0 +1,46 @@
+{
+  "title": "Cessna F150L Exterior Check",
+  "subtitle": "",
+  "phases": [
+    {"name": "1. Inside the Cabin", "checklist_items": [
+        {"read": "Gust Lock", "do": "REMOVE" },
+        {"read": "Magneto Switch ", "do": "OFF" },
+        {"read": "Main Switch", "do": "ON, test fuel pump, test fuel pressure, then OFF" },
+        {"read": "Fuel Valve", "do": "ON" }
+      ]
+    },
+    {"name": "2. Tail Section", "checklist_items": [
+        {"read": "Rudder Lock", "do": "REMOVE if locked" },
+        {"read": "Rudder", "do": "CHECK freedom of movement & security" },
+        {"read": "Tie Down", "do": "RELEASE" }
+      ]
+    },
+    {"name": "3. Right Wing Trailing Edge", "checklist_items": [
+        {"read": "Right Aileron", "do": "CHECK freedom of movement & security"
+        }
+      ]
+    },
+    {"name": "4. Right Wing Leading Edge", "checklist_items": [
+        {"read": "Wing Tie Down", "do": "RELEASE"
+        },
+        {"read": "Right Main Landing Gear Tire", "do": "CHECK PRESSURE"
+        },
+        {"read": "Fuel Tank", "do": "DRAIN, CHECK for water/sediment"
+        },
+        {"read": "Fuel Level", "do": "CHECK"
+        },
+        {"read": "Fuel Filler Cap", "do": "CLOSE, CHECK for tightness"
+        }
+      ]
+    },
+    {"name": "5. Nose Section", "checklist_items": [
+        {"read": "Coolant Level", "do": "CHECK"
+        },
+        {"read": "Coolant Expansion Tank", "do": "CHECK FULL"
+        },
+        {"read": "", "do": ""
+        }
+      ]
+    }
+  ]
+}

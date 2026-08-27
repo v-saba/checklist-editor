@@ -1,6 +1,9 @@
-venv
 .venv
-instance
+venv
 __pycache__
 *.pyc
+.git
+instance
 logs
+*.db
+tmp

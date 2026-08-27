@@ -4,6 +4,28 @@ LaTeX generator for checklist PDFs.
 import os
 import subprocess
 
+# Single-pass map so replacement text (e.g. \textbackslash{}) is not re-escaped.
+_LATEX_ESCAPE_MAP = {
+    '\\': r'\textbackslash{}',
+    '&': r'\&',
+    '%': r'\%',
+    '$': r'\$',
+    '#': r'\#',
+    '_': r'\_',
+    '{': r'\{',
+    '}': r'\}',
+    '~': r'\textasciitilde{}',
+    '^': r'\textasciicircum{}',
+}
+
+
+def escape_latex(text):
+    """Escape LaTeX special characters in user-controlled strings."""
+    if text is None:
+        return ''
+    return ''.join(_LATEX_ESCAPE_MAP.get(ch, ch) for ch in str(text))
+
+
 def generate_latex(title, subtitle, phases_data):
     """
     Generate LaTeX content for a checklist.
@@ -16,6 +38,9 @@ def generate_latex(title, subtitle, phases_data):
     Returns:
         str: The complete LaTeX document content
     """
+    title = escape_latex(title)
+    subtitle = escape_latex(subtitle)
+
     latex_content = f'''\\documentclass[12pt]{{article}}
 \\usepackage[a4paper, margin=1in]{{geometry}}
 \\usepackage{{enumitem}}
@@ -44,14 +69,14 @@ def generate_latex(title, subtitle, phases_data):
 '''
 
     for phase in phases_data:
-        latex_content += f'\\section*{{{phase["name"]}}}\n'
+        latex_content += f'\\section*{{{escape_latex(phase["name"])}}}\n'
         # Only create enumerate environment if there are items
         if phase.get("checklist_items", []):
             latex_content += '\\begin{enumerate}\n'
             for item in phase["checklist_items"]:
-                latex_content += f'\\item \\textbf{{{item["read"]}}}'
+                latex_content += f'\\item \\textbf{{{escape_latex(item["read"])}}}'
                 if item.get("do"):  # Only add dotfill and "do" part if it exists
-                    latex_content += f'\\dotfill{{{item["do"]}}}'
+                    latex_content += f'\\dotfill{{{escape_latex(item["do"])}}}'
                 latex_content += '\n'
             latex_content += '\\end{enumerate}\n'
         latex_content += '\n'
