@@ -428,36 +428,40 @@
                             });
 
                             const phaseId = `phase-${phases.length - 1}`;
+                            const phaseIndex = phases.length - 1;
                             const phaseHtml = `
                                 <div id="${phaseId}" class="border rounded-lg p-4 phase-container">
                                     <div class="flex justify-between items-center mb-4">
                                         <input type="text" class="form-input w-full px-3 py-2 border border-gray-300 rounded-md mr-4"
                                                value="${phase.name}"
-                                               onchange="updatePhaseName(${phases.length - 1}, this.value)">
-                                        <button type="button" onclick="removePhase(${phases.length - 1})"
+                                               onchange="updatePhaseName(${phaseIndex}, this.value)"
+                                               onkeydown="handlePhaseNameKeyPress(event, ${phaseIndex})">
+                                        <button type="button" onclick="removePhase(${phaseIndex})"
                                                 class="text-red-600 hover:text-red-800">
                                             Remove Phase
                                         </button>
                                     </div>
                                     <div class="space-y-2" id="items-${phaseId}">
                                         ${(phase.checklist_items || []).map((item, itemIndex) => `
-                                            <div id="item-${phases.length - 1}-${itemIndex}" class="item-row bg-white dark:bg-gray-800 p-2 rounded border">
+                                            <div id="item-${phaseIndex}-${itemIndex}" class="item-row bg-white dark:bg-gray-800 p-2 rounded border">
                                                 <input type="text" class="form-input px-3 py-2 border border-gray-300 rounded-md"
                                                        value="${item.read || ''}"
                                                        placeholder="Read part (e.g., Water pressure)"
-                                                       onchange="updateItem(${phases.length - 1}, ${itemIndex}, 'read', this.value)">
+                                                       onchange="updateItem(${phaseIndex}, ${itemIndex}, 'read', this.value)"
+                                                       onkeydown="handleItemKeyPress(event, ${phaseIndex}, ${itemIndex}, 'read')">
                                                 <input type="text" class="form-input px-3 py-2 border border-gray-300 rounded-md"
                                                        value="${item.do || ''}"
                                                        placeholder="Do part (e.g., CHECK)"
-                                                       onchange="updateItem(${phases.length - 1}, ${itemIndex}, 'do', this.value)">
-                                                <button type="button" onclick="removeItem(${phases.length - 1}, ${itemIndex})"
+                                                       onchange="updateItem(${phaseIndex}, ${itemIndex}, 'do', this.value)"
+                                                       onkeydown="handleItemKeyPress(event, ${phaseIndex}, ${itemIndex}, 'do')">
+                                                <button type="button" onclick="removeItem(${phaseIndex}, ${itemIndex})"
                                                         class="text-red-600 hover:text-red-800">
                                                     ×
                                                 </button>
                                             </div>
                                         `).join('')}
                                     </div>
-                                    <button type="button" onclick="addItem(${phases.length - 1})"
+                                    <button type="button" onclick="addItem(${phaseIndex})"
                                             class="mt-2 text-indigo-600 hover:text-indigo-800">
                                         + Add Item
                                     </button>
